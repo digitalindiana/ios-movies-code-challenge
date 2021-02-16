@@ -1,0 +1,32 @@
+/* 
+  Localizable.strings
+  Movies
+
+  Created by Piotr Adamczak on 16/01/2021.
+  
+*/
+// Movies List VC
+"Movies list" = "Lista filmów";
+"Search for movie.." = "Szukaj filmu..";
+
+// Movie Details VC
+"Movie details" = "Szczegóły filmy";
+"Warning ⚠️" = "Uwaga ⚠️";
+"Playback not supported 😥" = "Odtwarzanie nie wspierane 😥";
+"Okay.." = "Ok..";
+
+// Movie Details General Info
+"Synopsis" = "Fabuła";
+"Score" = "Ocena";
+"Reviews" = "Oceny";
+"Popularity" = "Popularność";
+
+// Movie Details Cast Info
+"Director" = "Reżyser";
+"Writer" = "Scenariusz";
+"Actors" = "Aktorzy";
+
+// Errors
+"Type at least 3 characters to start search.." = "Podaj conajmniej 3 znaki by zacząc szukać..";
+"Check Internet connection and try again" = "Sprawdź połączenie z Internetem";
+"Wrong URL" = "Zły URL";

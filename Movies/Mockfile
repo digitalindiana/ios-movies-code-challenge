@@ -1,0 +1,17 @@
+sourceryCommand: null
+sourceryTemplate: null
+MoviesTests:
+  sources:
+    include:
+    - ./Movies
+  output: ./MoviesTests/Mock.generated.swift
+  targets:
+  - MoviesTests
+  testable:
+  - Movies
+  import:
+  - Combine
+  - Foundation
+  - Logging
+  - SDWebImage
+  - UIKit
