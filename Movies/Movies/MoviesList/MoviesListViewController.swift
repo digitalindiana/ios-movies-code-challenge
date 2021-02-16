@@ -9,32 +9,43 @@ import UIKit
 
 
 class MoviesListViewController: UIViewController {
-    @IBOutlet var collectionView: UICollectionView!
-    @IBOutlet var errorView: ErrorView!
 
     let searchController = UISearchController(searchResultsController: nil)
     var viewModel: MoviesListViewModelProtocol? = DefaultMoviesListViewModel()
 
+    var aView: MoviesListView {
+        return view as! MoviesListView
+    }
+
     // Constants
     static let numberOfCellsPerRow: CGFloat = 2
+
+    override func loadView() {
+        view = MoviesListView()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         title = NSLocalizedString("Movies list", comment: "Title of Movies List Controller")
 
-        configureCollectionView()
+        aView.collectionView.delegate = self
+        aView.collectionView.register(MovieListCell.self, forCellWithReuseIdentifier: MovieListCell.reuseIdentifier)
+
         configureSearchController()
         configureHandlers()
 
-        viewModel?.setupDataSource(for: collectionView)
+        viewModel?.setupDataSource(for: aView.collectionView)
         viewModel?.clearData(generateError: true)
     }
 
-    func configureCollectionView() {
-        collectionView.delegate = self
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        configureCollectionView()
+    }
 
+    func configureCollectionView() {
         // Calculate item size and section inset
-        if let flowLayout = collectionView?.collectionViewLayout as? UICollectionViewFlowLayout {
+        if let flowLayout = aView.collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
             let horizontalSpacing = flowLayout.minimumInteritemSpacing
             flowLayout.sectionInset = UIEdgeInsets(top: horizontalSpacing, left: horizontalSpacing,
                                                    bottom: horizontalSpacing, right: horizontalSpacing)
@@ -57,30 +68,22 @@ class MoviesListViewController: UIViewController {
     }
 
     func configureHandlers() {
-        errorView.isHidden = true
+        aView.errorView.isHidden = true
         viewModel?.errorHandler = { errorData in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                self.errorView.isHidden = false
-                self.collectionView.isHidden = true
-                self.errorView.show(errorData)
+                self.aView.errorView.isHidden = false
+                self.aView.collectionView.isHidden = true
+                self.aView.errorView.show(errorData)
             }
         }
 
         viewModel?.moviesLoaded = { [weak self] _ in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                self.errorView.isHidden = true
-                self.collectionView.isHidden = false
+                self.aView.errorView.isHidden = true
+                self.aView.collectionView.isHidden = false
             }
-        }
-    }
-
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let movieMetadata = sender as? MovieMetadata,
-           let movieDetailsVC = segue.destination as? MovieDetailsViewController,
-           segue is MovieDetailsSegue {
-            movieDetailsVC.movieMetadata = movieMetadata
         }
     }
 }
@@ -112,6 +115,9 @@ extension MoviesListViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let selectedMovie = viewModel?.dataSource?.itemIdentifier(for: indexPath) else { return }
-        performSegue(withIdentifier: MovieDetailsSegue.identifier, sender: selectedMovie)
+
+        let movieDetailsVC = MovieDetailsViewController()
+        movieDetailsVC.movieMetadata = selectedMovie
+        navigationController?.pushViewController(movieDetailsVC, animated: true)
     }
 }

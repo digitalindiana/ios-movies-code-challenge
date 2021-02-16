@@ -72,8 +72,8 @@ class DefaultMoviesListViewModel: NSObject, MoviesListViewModelProtocol {
                                                         cellProvider: { [weak self] (collectionView, indexPath, movie) -> UICollectionViewCell? in
 
             if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MovieListCell.reuseIdentifier, for: indexPath) as? MovieListCell {
-                cell.movieTitleLabel?.text = movie.title
-                cell.posterImageView?.image = movie.cachedPoster
+                cell.movieTitleLabel.text = movie.title
+                cell.posterImageView.image = movie.cachedPoster
 
                 self?.downloadPoster(movie: movie) { [weak self] (image, movieObject) in
                     if image != movieObject.cachedPoster {
