@@ -2,14 +2,14 @@
 //  MovieDetailsModel.swift
 //  Movies
 //
-//  Created by Piotr Adamczak on 15/01/2021.
+//  Created by Piotr Adamczak on 16/02/2021.
 //
 
 import Foundation
 
 // MARK: - Movie
 
-struct Movie: Codable {
+class Movie: Codable {
     let title, year, rated, released: String
     let runtime, genre, director, writer: String
     let actors, plot, language, country: String

@@ -2,7 +2,7 @@
 //  AppDelegate.swift
 //  Movies
 //
-//  Created by Piotr Adamczak on 13/01/2021.
+//  Created by Piotr Adamczak on 16/02/2021.
 //
 
 import UIKit
@@ -10,13 +10,8 @@ import UIKit
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-
-        LoggerService.shared.logLevel = .debug
-
         return true
     }
 

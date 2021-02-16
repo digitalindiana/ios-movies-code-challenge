@@ -2,14 +2,14 @@
 //  MovieDetailsHeaderView.swift
 //  Movies
 //
-//  Created by Piotr Adamczak on 15/01/2021.
+//  Created by Piotr Adamczak on 16/02/2021.
 //
 
 import Foundation
 import UIKit
 
 struct MovieDetailsHeaderModel {
-    var posterImageUrl: URL?
+    var cachedPoster: UIImage?
     let title: String
     let year: String
 }
@@ -23,11 +23,11 @@ class MovieDetailsHeaderView: UIView {
     override func awakeFromNib() {
         super.awakeFromNib()
 
-        fill(with: MovieDetailsHeaderModel(posterImageUrl: nil, title: "", year: ""))
+        fill(with: MovieDetailsHeaderModel(cachedPoster: nil, title: "", year: ""))
     }
 
     func fill(with model: MovieDetailsHeaderModel) {
-        posterImageView.sd_setImage(with: model.posterImageUrl)
+        posterImageView.image = model.cachedPoster
         movieTitleLabel.text = model.title
         movieYearLabel.text = model.year
     }

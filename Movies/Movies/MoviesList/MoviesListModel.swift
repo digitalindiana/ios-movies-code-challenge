@@ -2,10 +2,11 @@
 //  MoviesListModel.swift
 //  Movies
 //
-//  Created by Piotr Adamczak on 13/01/2021.
+//  Created by Piotr Adamczak on 16/02/2021.
 //
 
 import Foundation
+import UIKit
 
 // MARK: - MoviesListResponse
 
@@ -23,11 +24,14 @@ struct MoviesListResponse: Codable {
 
 // MARK: - Movie
 
-struct MovieMetadata: Codable {
+class MovieMetadata: Codable {
     let uuid = UUID()
-    let title, year, imdbID: String
-    let type: MediaType
+    let title: String
+    let year: String
+    let imdbID: String
+    let type: MediaType = .movie
     let poster: String
+    var cachedPoster: UIImage? = nil
 
     enum CodingKeys: String, CodingKey {
         case title = "Title"

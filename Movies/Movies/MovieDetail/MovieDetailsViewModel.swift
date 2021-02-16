@@ -2,19 +2,17 @@
 //  MoviesListViewModel.swift
 //  Movies
 //
-//  Created by Piotr Adamczak on 13/01/2021.
+//  Created by Piotr Adamczak on 16/02/2021.
 //
 
 import Combine
 import Foundation
-import Logging
-import SDWebImage
 import UIKit
 
 typealias MovieDetailsViewModelDataTuple = (header: MovieDetailsHeaderModel,
                                             general: MovieDetailsGeneralInfoModel,
                                             cast: MovieDetailsCastInfoModel)
-// sourcery: AutoMockable
+
 protocol MovieDetailViewModelProtocol {
     // API Service
     var apiService: APIServiceProtocol? { get }
@@ -25,7 +23,7 @@ protocol MovieDetailViewModelProtocol {
 
     // Data related
     var currentMovie: Movie? { get set }
-    func fetchMovie(imdbID: String)
+    func fetchMovie(movieMetadata: MovieMetadata)
 }
 
 class DefaultMovieDetailsViewModel: NSObject, MovieDetailViewModelProtocol {
@@ -40,10 +38,10 @@ class DefaultMovieDetailsViewModel: NSObject, MovieDetailViewModelProtocol {
 
     /// Fetches the details for given movie ID
     /// - Parameter imdbID: String
-    func fetchMovie(imdbID: String) {
-        LoggerService.shared.debug("Getting movie \(imdbID)")
+    func fetchMovie(movieMetadata: MovieMetadata) {
+        LoggerService.shared.debug("Getting movie \(movieMetadata.imdbID)")
 
-        let endpoint = OMDBApiEndpoint.movieDetail(imdbID: imdbID)
+        let endpoint = OMDBApiEndpoint.movieDetail(imdbID: movieMetadata.imdbID)
         let publisher: AnyPublisher<Movie, ApiError>? = apiService?.performRequest(to: endpoint,
                                                                                    responseErrorType: OMDBApiResponseError.self)
         publisher?.receive(on: DispatchQueue.main)
@@ -59,7 +57,7 @@ class DefaultMovieDetailsViewModel: NSObject, MovieDetailViewModelProtocol {
                 guard let self = self else { return }
                 LoggerService.shared.debug("Got response with \(movie) movie")
                 self.currentMovie = movie
-                self.movieLoaded?(self.viewData(for: movie))
+                self.movieLoaded?(self.viewData(for: movie, poster: movieMetadata.cachedPoster))
 
             }).store(in: &subscriptions)
     }
@@ -67,8 +65,8 @@ class DefaultMovieDetailsViewModel: NSObject, MovieDetailViewModelProtocol {
     /// Converts model into the data created for view
     /// - Parameter movie: Movie
     /// - Returns: Tuple with header, general and cast informations
-    func viewData(for movie: Movie) -> MovieDetailsViewModelDataTuple {
-        let header = MovieDetailsHeaderModel(posterImageUrl: URL(string: movie.poster),
+    func viewData(for movie: Movie, poster: UIImage?) -> MovieDetailsViewModelDataTuple {
+        let header = MovieDetailsHeaderModel(cachedPoster: poster,
                                              title: movie.title,
                                              year: movie.year)
 

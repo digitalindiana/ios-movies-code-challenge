@@ -2,7 +2,7 @@
 //  MovieDetailsViewController.swift
 //  Movies
 //
-//  Created by Piotr Adamczak on 15/01/2021.
+//  Created by Piotr Adamczak on 16/02/2021.
 //
 
 import UIKit
@@ -12,7 +12,7 @@ class MovieDetailsSegue: UIStoryboardSegue {
 }
 
 class MovieDetailsViewController: UIViewController {
-    var imdbId: String?
+    var movieMetadata: MovieMetadata?
 
     @IBOutlet var scrollView: UIScrollView!
     @IBOutlet var contentStackView: UIStackView!
@@ -34,8 +34,8 @@ class MovieDetailsViewController: UIViewController {
 
         configureHandlers()
 
-        if let imdbId = imdbId {
-            viewModel?.fetchMovie(imdbID: imdbId)
+        if let movieMetadata = movieMetadata {
+            viewModel?.fetchMovie(movieMetadata: movieMetadata)
         }
     }
 

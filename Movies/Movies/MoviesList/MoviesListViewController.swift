@@ -2,7 +2,7 @@
 //  MoviesListViewController.swift
 //  Movies
 //
-//  Created by Piotr Adamczak on 13/01/2021.
+//  Created by Piotr Adamczak on 16/02/2021.
 //
 
 import UIKit
@@ -77,10 +77,10 @@ class MoviesListViewController: UIViewController {
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let movie = sender as? MovieMetadata,
+        if let movieMetadata = sender as? MovieMetadata,
            let movieDetailsVC = segue.destination as? MovieDetailsViewController,
            segue is MovieDetailsSegue {
-            movieDetailsVC.imdbId = movie.imdbID
+            movieDetailsVC.movieMetadata = movieMetadata
         }
     }
 }

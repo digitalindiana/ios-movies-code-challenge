@@ -2,7 +2,7 @@
 //  APIService.swift
 //  Movies
 //
-//  Created by Piotr Adamczak on 13/01/2021.
+//  Created by Piotr Adamczak on 16/02/2021.
 //
 
 import Combine
@@ -15,7 +15,6 @@ enum ApiError: Error {
     case generalError(error: Error)
 }
 
-// sourcery: AutoMockable
 protocol Endpoint {
     var path: String { get }
     var queryItems: [URLQueryItem] { get }
@@ -25,7 +24,6 @@ protocol APIResponseError: Decodable {
     var error: String { get }
 }
 
-// sourcery: AutoMockable
 protocol Pagination {
     var queryItem: String { get }
     var currentPage: Int { get }
@@ -46,7 +44,6 @@ extension Pagination {
     }
 }
 
-// sourcery: AutoMockable
 protocol APIServiceProtocol {
     var baseUrl: String { get }
     var pagination: Pagination? { get set }

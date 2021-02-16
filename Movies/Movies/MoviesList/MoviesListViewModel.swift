@@ -2,13 +2,11 @@
 //  MoviesListViewModel.swift
 //  Movies
 //
-//  Created by Piotr Adamczak on 13/01/2021.
+//  Created by Piotr Adamczak on 16/02/2021.
 //
 
 import Combine
 import Foundation
-import Logging
-import SDWebImage
 import UIKit
 
 enum MoviesListSection {
@@ -18,13 +16,15 @@ enum MoviesListSection {
 typealias MoviesDataSource = UICollectionViewDiffableDataSource<MoviesListSection, MovieMetadata>
 typealias MoviesDataSnapshot = NSDiffableDataSourceSnapshot<MoviesListSection, MovieMetadata>
 
-// sourcery: AutoMockable
 protocol MoviesListViewModelProtocol {
     // DataSource for collection view diffable data source
     var dataSource: MoviesDataSource? { get }
 
     // API Service
     var apiService: APIServiceProtocol? { get }
+
+    // Basic image cache
+    var imageCache: NSCache<NSURL, UIImage> { get }
 
     // Handlers
     var moviesLoaded: (([MovieMetadata]) -> Void)? { get set }
@@ -47,6 +47,9 @@ class DefaultMoviesListViewModel: NSObject, MoviesListViewModelProtocol {
     var moviesLoaded: (([MovieMetadata]) -> Void)?
     var errorHandler: ((ErrorData) -> Void)?
 
+    // Small image cache
+    internal let imageCache = NSCache<NSURL, UIImage>()
+
     var currentMovies: [MovieMetadata] = [] {
         didSet {
             DispatchQueue.main.async { [weak self] in
@@ -66,16 +69,54 @@ class DefaultMoviesListViewModel: NSObject, MoviesListViewModelProtocol {
     /// - Parameter collectionView: UICollectionView
     func setupDataSource(for collectionView: UICollectionView) {
         dataSource = UICollectionViewDiffableDataSource(collectionView: collectionView,
-                                                        cellProvider: { (collectionView, indexPath, movie) -> UICollectionViewCell? in
+                                                        cellProvider: { [weak self] (collectionView, indexPath, movie) -> UICollectionViewCell? in
 
-                                                            if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MovieListCell.reuseIdentifier,
-                                                                                                             for: indexPath) as? MovieListCell {
-                                                                cell.movieTitleLabel?.text = movie.title
-                                                                cell.posterImageView?.sd_setImage(with: URL(string: movie.poster))
-                                                                return cell
-                                                            }
-                                                            return UICollectionViewCell()
-                                                        })
+            if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MovieListCell.reuseIdentifier, for: indexPath) as? MovieListCell {
+                cell.movieTitleLabel?.text = movie.title
+                cell.posterImageView?.image = movie.cachedPoster
+
+                self?.downloadPoster(movie: movie) { [weak self] (image, movieObject) in
+                    if image != movieObject.cachedPoster {
+                        if var updatedSnapshot = self?.dataSource?.snapshot() {
+                            if let datasourceIndex = updatedSnapshot.indexOfItem(movieObject),
+                               let currentMovie = self?.currentMovies[datasourceIndex] {
+                                currentMovie.cachedPoster = image
+                                updatedSnapshot.reloadItems([currentMovie])
+                                self?.dataSource?.apply(updatedSnapshot, animatingDifferences: true)
+                            }
+                        }
+                    }
+                }
+
+                return cell
+            }
+            return UICollectionViewCell()
+        })
+    }
+
+    func downloadPoster(movie: MovieMetadata, completion: @escaping (UIImage, MovieMetadata) -> ()) {
+        guard let posterUrl = NSURL(string: movie.poster), movie.poster != "N/A" else { return }
+
+        if let cachedImage = imageCache.object(forKey: posterUrl) {
+            DispatchQueue.main.async {
+                completion(cachedImage, movie)
+            }
+            return
+        }
+
+        if let url = URL(string: movie.poster) {
+            let task = URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+                guard let data = data, let image = UIImage(data: data), error == nil else { return }
+
+                self?.imageCache.setObject(image, forKey: posterUrl)
+
+                DispatchQueue.main.async {
+                    completion(image, movie)
+                }
+            }
+
+            task.resume()
+        }
     }
 
     /// Returns pagination object for given search term

@@ -3,11 +3,10 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 50;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0E1B7F9C25B35D57001E231F /* SwiftyMocky in Frameworks */ = {isa = PBXBuildFile; productRef = 0E1B7F9B25B35D57001E231F /* SwiftyMocky */; };
 		0E1B7FA325B35E71001E231F /* MoviesListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E1B7FA225B35E71001E231F /* MoviesListViewModelTests.swift */; };
 		0E1B7FB025B3789E001E231F /* MovieDetailViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E1B7FAF25B3789E001E231F /* MovieDetailViewModelTests.swift */; };
 		0E53796A25B3830800D8A39D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0E53796825B3830800D8A39D /* Localizable.strings */; };
@@ -26,10 +25,8 @@
 		0E6F152225AF4846004863B0 /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6F152125AF4846004863B0 /* APIService.swift */; };
 		0E6F152A25AF48E8004863B0 /* MoviesListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6F152925AF48E8004863B0 /* MoviesListModel.swift */; };
 		0E6F152F25AF6E2D004863B0 /* MoviesListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6F152E25AF6E2D004863B0 /* MoviesListViewModel.swift */; };
-		0E6F153625AF7318004863B0 /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = 0E6F153525AF7318004863B0 /* SDWebImage */; };
 		0E6F153C25AF7598004863B0 /* MovieListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6F153B25AF7598004863B0 /* MovieListCell.swift */; };
 		0E6F154425AF8215004863B0 /* OMDBApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6F154325AF8215004863B0 /* OMDBApiService.swift */; };
-		0E6F155A25B05F8B004863B0 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 0E6F155925B05F8B004863B0 /* Logging */; };
 		0E73EE5C25B3802E005F5405 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0E73EE5625B3802E005F5405 /* Localizable.strings */; };
 		0E7A9BF125B3575700AEA889 /* Mock.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E7A9BF025B3575700AEA889 /* Mock.generated.swift */; };
 		0EE2302E25B1FC7C004F0D27 /* MovieDetailsCastInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE2302C25B1FC7C004F0D27 /* MovieDetailsCastInfoView.swift */; };
@@ -83,8 +80,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0E6F155A25B05F8B004863B0 /* Logging in Frameworks */,
-				0E6F153625AF7318004863B0 /* SDWebImage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,7 +87,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0E1B7F9C25B35D57001E231F /* SwiftyMocky in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -166,7 +160,7 @@
 				0E6F14EF25AF4615004863B0 /* Assets.xcassets */,
 				0E6F14F125AF4615004863B0 /* LaunchScreen.storyboard */,
 				0E6F14F425AF4615004863B0 /* Info.plist */,
-				0E73EE6925B38074005F5405 /* Loca */,
+				0E73EE6925B38074005F5405 /* Localization */,
 			);
 			path = Movies;
 			sourceTree = "<group>";
@@ -230,13 +224,13 @@
 			path = Movies/Base.lproj;
 			sourceTree = SOURCE_ROOT;
 		};
-		0E73EE6925B38074005F5405 /* Loca */ = {
+		0E73EE6925B38074005F5405 /* Localization */ = {
 			isa = PBXGroup;
 			children = (
 				0E73EE5125B3802E005F5405 /* Base.lproj */,
 				0E73EE4C25B3802E005F5405 /* pl.lproj */,
 			);
-			name = Loca;
+			name = Localization;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -256,8 +250,6 @@
 			);
 			name = Movies;
 			packageProductDependencies = (
-				0E6F153525AF7318004863B0 /* SDWebImage */,
-				0E6F155925B05F8B004863B0 /* Logging */,
 			);
 			productName = Movies;
 			productReference = 0E6F14E325AF4612004863B0 /* Movies.app */;
@@ -279,7 +271,6 @@
 			);
 			name = MoviesTests;
 			packageProductDependencies = (
-				0E1B7F9B25B35D57001E231F /* SwiftyMocky */,
 			);
 			productName = MoviesTests;
 			productReference = 0E6F14F925AF4615004863B0 /* MoviesTests.xctest */;
@@ -314,9 +305,6 @@
 			);
 			mainGroup = 0E6F14DA25AF4612004863B0;
 			packageReferences = (
-				0E6F153425AF7318004863B0 /* XCRemoteSwiftPackageReference "SDWebImage" */,
-				0E6F155825B05F8B004863B0 /* XCRemoteSwiftPackageReference "swift-log" */,
-				0E1B7F9A25B35D57001E231F /* XCRemoteSwiftPackageReference "SwiftyMocky" */,
 			);
 			productRefGroup = 0E6F14E425AF4612004863B0 /* Products */;
 			projectDirPath = "";
@@ -685,51 +673,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		0E1B7F9A25B35D57001E231F /* XCRemoteSwiftPackageReference "SwiftyMocky" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/MakeAWishFoundation/SwiftyMocky";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.0.1;
-			};
-		};
-		0E6F153425AF7318004863B0 /* XCRemoteSwiftPackageReference "SDWebImage" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SDWebImage/SDWebImage.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.10.2;
-			};
-		};
-		0E6F155825B05F8B004863B0 /* XCRemoteSwiftPackageReference "swift-log" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/apple/swift-log.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.4.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		0E1B7F9B25B35D57001E231F /* SwiftyMocky */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 0E1B7F9A25B35D57001E231F /* XCRemoteSwiftPackageReference "SwiftyMocky" */;
-			productName = SwiftyMocky;
-		};
-		0E6F153525AF7318004863B0 /* SDWebImage */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 0E6F153425AF7318004863B0 /* XCRemoteSwiftPackageReference "SDWebImage" */;
-			productName = SDWebImage;
-		};
-		0E6F155925B05F8B004863B0 /* Logging */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 0E6F155825B05F8B004863B0 /* XCRemoteSwiftPackageReference "swift-log" */;
-			productName = Logging;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0E6F14DB25AF4612004863B0 /* Project object */;
 }

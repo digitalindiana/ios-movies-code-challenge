@@ -2,7 +2,7 @@
 //  MovieListCell.swift
 //  Movies
 //
-//  Created by Piotr Adamczak on 13/01/2021.
+//  Created by Piotr Adamczak on 16/02/2021.
 //
 
 import Foundation

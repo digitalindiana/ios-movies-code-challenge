@@ -2,13 +2,13 @@
 //  ErrorView.swift
 //  Movies
 //
-//  Created by Piotr Adamczak on 14/01/2021.
+//  Created by Piotr Adamczak on 16/02/2021.
 //
 
 import Foundation
 import UIKit
 
-// sourcery: AutoMockable
+
 protocol ErrorData {
     var imageName: String { get }
     var errorDescription: String { get }
