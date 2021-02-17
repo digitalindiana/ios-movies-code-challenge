@@ -5,7 +5,6 @@
 //  Created by Piotr Adamczak on 16/02/2021.
 //
 
-import Combine
 import Foundation
 import UIKit
 
@@ -34,32 +33,26 @@ class DefaultMovieDetailsViewModel: NSObject, MovieDetailViewModelProtocol {
 
     var currentMovie: Movie?
 
-    var subscriptions: Set<AnyCancellable> = Set()
-
     /// Fetches the details for given movie ID
     /// - Parameter imdbID: String
     func fetchMovie(movieMetadata: MovieMetadata) {
         LoggerService.shared.debug("Getting movie \(movieMetadata.imdbID)")
 
         let endpoint = OMDBApiEndpoint.movieDetail(imdbID: movieMetadata.imdbID)
-        let publisher: AnyPublisher<Movie, ApiError>? = apiService?.performRequest(to: endpoint,
-                                                                                   responseErrorType: OMDBApiResponseError.self)
-        publisher?.receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { [weak self] completion in
-                guard let self = self else { return }
 
-                if case let .failure(apiError) = completion {
-                    LoggerService.shared.error("Got error while on receving movie: \(apiError)")
-                    self.errorHandler?(OMDBErrorData(apiError: apiError))
-                }
+        apiService?.performRequest(to: endpoint, responseType: Movie.self, responseErrorType: OMDBApiResponseError.self) { result in
 
-            }, receiveValue: { [weak self] movie in
-                guard let self = self else { return }
+            switch result {
+            case .failure(let apiError):
+                LoggerService.shared.error("Got error while on receving movie: \(apiError)")
+                self.errorHandler?(OMDBErrorData(apiError: apiError))
+
+            case .success(let movie):
                 LoggerService.shared.debug("Got response with \(movie) movie")
                 self.currentMovie = movie
                 self.movieLoaded?(self.viewData(for: movie, poster: movieMetadata.cachedPoster))
-
-            }).store(in: &subscriptions)
+            }
+        }
     }
 
     /// Converts model into the data created for view

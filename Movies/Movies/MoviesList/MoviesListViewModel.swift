@@ -5,7 +5,6 @@
 //  Created by Piotr Adamczak on 16/02/2021.
 //
 
-import Combine
 import Foundation
 import UIKit
 
@@ -61,9 +60,6 @@ class DefaultMoviesListViewModel: NSObject, MoviesListViewModelProtocol {
 
     // Flag used for loading one request at time if needed
     var isLoadingData = false
-
-    // Save the publishers references to remove them from memory
-    var subscriptions: Set<AnyCancellable> = Set()
 
     /// Setup of UICollectionViewDiffableDataSource
     /// - Parameter collectionView: UICollectionView
@@ -155,25 +151,17 @@ class DefaultMoviesListViewModel: NSObject, MoviesListViewModelProtocol {
 
         // Create endpoint using given title and pagination
         let endpoint = OMDBApiEndpoint.moviesList(searchedTitle: searchedTitle, page: pagination.currentPage)
-        let publisher: AnyPublisher<MoviesListResponse, ApiError>? = apiService?.performRequest(to: endpoint,
-                                                                                                responseErrorType: OMDBApiResponseError.self)
-        publisher?.receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { [weak self] completion in
-                guard let self = self else { return }
 
-                // Receives the error from API Response or network error
-                if case let .failure(apiError) = completion {
-                    LoggerService.shared.error("Got error while on receving movies: \(apiError)")
+        apiService?.performRequest(to: endpoint, responseType: MoviesListResponse.self, responseErrorType: OMDBApiResponseError.self) { result in
 
-                    // Inform about error
-                    self.errorHandler?(OMDBErrorData(apiError: apiError))
-                }
-
+            switch result {
+            case .failure(let apiError):
+                LoggerService.shared.error("Got error while on receving movies: \(apiError)")
+                // Inform about error
+                self.errorHandler?(OMDBErrorData(apiError: apiError))
                 self.isLoadingData = false
 
-            }, receiveValue: { [weak self] moviesListResponse in
-                guard let self = self else { return }
-
+            case .success(let moviesListResponse):
                 if let totalResults = Int(moviesListResponse.totalResults) {
                     let movies = moviesListResponse.movies
                     LoggerService.shared.debug("Got response with \(movies.count) movies, total:\(totalResults)")
@@ -184,8 +172,9 @@ class DefaultMoviesListViewModel: NSObject, MoviesListViewModelProtocol {
                     // Inform about success load
                     self.moviesLoaded?(self.currentMovies)
                 }
-
-            }).store(in: &subscriptions)
+                self.isLoadingData = false
+            }
+        }
     }
 
     /// Helper method for loading more data

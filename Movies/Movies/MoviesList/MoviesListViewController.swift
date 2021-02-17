@@ -7,7 +7,6 @@
 
 import UIKit
 
-
 class MoviesListViewController: UIViewController {
 
     let searchController = UISearchController(searchResultsController: nil)

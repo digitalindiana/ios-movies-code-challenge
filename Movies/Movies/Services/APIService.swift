@@ -5,7 +5,6 @@
 //  Created by Piotr Adamczak on 16/02/2021.
 //
 
-import Combine
 import Foundation
 
 enum ApiError: Error {
@@ -48,7 +47,10 @@ protocol APIServiceProtocol {
     var baseUrl: String { get }
     var pagination: Pagination? { get set }
     func fullUrl(for endpoint: Endpoint) -> URL?
-    func performRequest<Response: Decodable, APIError: Decodable>(to endpoint: Endpoint, responseErrorType: APIError.Type) -> AnyPublisher<Response, ApiError>?
+    func performRequest<Response: Decodable, APIError: Decodable>(to endpoint: Endpoint,
+                                                                  responseType: Response.Type,
+                                                                  responseErrorType: APIError.Type,
+                                                                  completion: @escaping ((Result<Response, ApiError>) -> ()))
 }
 
 extension APIServiceProtocol {
@@ -65,33 +67,44 @@ extension APIServiceProtocol {
     /// - Parameters:
     ///   - endpoint: Endpoint struct which defines things like path.
     ///   - responseErrorType: Class used to decode JSON in case of API error
-    /// - Returns: Publisher with given generic Response type and ApiError
-    func performRequest<Response: Decodable, APIError: Decodable>(to endpoint: Endpoint, responseErrorType: APIError.Type) -> AnyPublisher<Response, ApiError>? {
+    ///   - completion: Block returning the result of type Response and ApiError
+    func performRequest<Response: Decodable, APIError: Decodable>(to endpoint: Endpoint,
+                                                                  responseType: Response.Type,
+                                                                  responseErrorType: APIError.Type,
+                                                                  completion: @escaping ((Result<Response, ApiError>) -> ())) {
         guard let url = fullUrl(for: endpoint) else {
-            return Fail(error: ApiError.wrongUrl).eraseToAnyPublisher()
+            return completion(.failure(ApiError.wrongUrl))
         }
 
-        return URLSession.shared.dataTaskPublisher(for: url)
-            .mapError {
-                if $0.code == URLError.notConnectedToInternet {
-                    return ApiError.noInternet
+        URLSession.shared.dataTask(with: url) { data, response, error in
+
+            if let urlError = error as? URLError,
+               urlError.code == URLError.notConnectedToInternet {
+                    completion(.failure(ApiError.noInternet))
+                    return
+            }
+
+            if let error = error {
+                completion(.failure(ApiError.generalError(error: error)))
+                return
+            }
+
+            if let data = data {
+
+                do {
+                    let responseObject = try JSONDecoder().decode(Response.self, from: data)
+                    completion(.success(responseObject))
                 }
-                return ApiError.generalError(error: $0)
-            }
-            .map { $0.data }
-            .flatMap { data -> AnyPublisher<Response, ApiError> in
-                Just(data)
-                    .decode(type: Response.self, decoder: JSONDecoder())
-                    .mapError({ (error) -> ApiError in
+                catch let parseError {
 
-                        if let errorResponse = try? JSONDecoder().decode(APIError.self, from: data) as? APIResponseError {
-                            return ApiError.response(errorFromApi: errorResponse.error)
-                        }
+                    if let errorResponse = try? JSONDecoder().decode(APIError.self, from: data) as? APIResponseError {
+                        completion(.failure(ApiError.response(errorFromApi: errorResponse.error)))
+                        return
+                    }
 
-                        return ApiError.generalError(error: error)
-                    })
-                    .eraseToAnyPublisher()
+                    completion(.failure(ApiError.generalError(error: parseError)))
+                }
             }
-            .eraseToAnyPublisher()
+        }.resume()
     }
 }
