@@ -12,6 +12,9 @@ class MoviesListViewController: UIViewController {
     let searchController = UISearchController(searchResultsController: nil)
     var viewModel: MoviesListViewModelProtocol? = DefaultMoviesListViewModel()
 
+    var favouriteButton: UIBarButtonItem?
+    var unfavouriteButton: UIBarButtonItem?
+
     var aView: MoviesListView {
         return view as! MoviesListView
     }
@@ -29,6 +32,7 @@ class MoviesListViewController: UIViewController {
 
         aView.collectionView.delegate = self
         aView.collectionView.register(MovieListCell.self, forCellWithReuseIdentifier: MovieListCell.reuseIdentifier)
+        aView.filtersButton.addTarget(self, action: #selector(MoviesListViewController.favouritesFilterTapped), for: .touchUpInside)
 
         configureSearchController()
         configureHandlers()
@@ -84,6 +88,12 @@ class MoviesListViewController: UIViewController {
                 self.aView.collectionView.isHidden = false
             }
         }
+    }
+
+    @objc func favouritesFilterTapped() {
+        guard var viewModel = viewModel else { return }
+        viewModel.showOnlyFavourites = !viewModel.showOnlyFavourites
+        aView.shouldShowFavouritesOnly =  viewModel.showOnlyFavourites
     }
 }
 

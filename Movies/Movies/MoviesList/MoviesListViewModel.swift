@@ -37,7 +37,10 @@ protocol MoviesListViewModelProtocol {
     func clearData(generateError: Bool)
 
     // Getting the actual data
+    var allMovies: [MovieMetadata] { get }
     var currentMovies: [MovieMetadata] { get }
+    var showOnlyFavourites: Bool { get set }
+    func refreshData()
     func fetchMovies(searchedTitle: String, forced: Bool)
     func fetchMoreMovies()
 }
@@ -52,6 +55,18 @@ class DefaultMoviesListViewModel: NSObject, MoviesListViewModelProtocol {
 
     // Small image cache
     internal let imageCache = NSCache<NSURL, UIImage>()
+
+    var showOnlyFavourites: Bool = false {
+        didSet {
+            refreshData()
+        }
+    }
+
+    var allMovies: [MovieMetadata] = [] {
+        didSet {
+            refreshData()
+        }
+    }
 
     var currentMovies: [MovieMetadata] = [] {
         didSet {
@@ -82,6 +97,7 @@ class DefaultMoviesListViewModel: NSObject, MoviesListViewModelProtocol {
                        var updatedSnapshot = self?.dataSource?.snapshot() {
                         updatedSnapshot.reloadItems([editedMovie])
                         self?.dataSource?.apply(updatedSnapshot, animatingDifferences: true)
+                        self?.refreshData()
                     }
                 }
 
@@ -145,6 +161,14 @@ class DefaultMoviesListViewModel: NSObject, MoviesListViewModelProtocol {
         }
     }
 
+    func refreshData() {
+        if showOnlyFavourites {
+            self.currentMovies = allMovies.filter({ favouritesStorageService?.isKeyPresent($0.imdbID) ?? false })
+        } else {
+            self.currentMovies = allMovies
+        }
+    }
+
     /// Fetches movies list for given term - use force option to allow multiple data loading at one time
     /// - Parameters:
     ///   - searchedTitle: Movie title to search
@@ -181,11 +205,11 @@ class DefaultMoviesListViewModel: NSObject, MoviesListViewModelProtocol {
                     let movies = moviesListResponse.movies
                     LoggerService.shared.debug("Got response with \(movies.count) movies, total:\(totalResults)")
 
-                    self.currentMovies.append(contentsOf: movies)
-                    self.apiService?.pagination = pagination.update(savedItems: self.currentMovies.count,
+                    self.allMovies.append(contentsOf: movies)
+                    self.apiService?.pagination = pagination.update(savedItems: self.allMovies.count,
                                                                     totalItems: totalResults)
                     // Inform about success load
-                    self.moviesLoaded?(self.currentMovies)
+                    self.moviesLoaded?(self.allMovies)
                 }
                 self.isLoadingData = false
             }
@@ -202,6 +226,7 @@ class DefaultMoviesListViewModel: NSObject, MoviesListViewModelProtocol {
     /// Clear displayed data
     /// - Parameter generateError: Generates empty query error to adjust UI
     func clearData(generateError: Bool) {
+        allMovies.removeAll()
         currentMovies.removeAll()
         apiService?.pagination = nil
 
