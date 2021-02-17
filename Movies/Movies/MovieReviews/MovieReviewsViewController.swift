@@ -23,10 +23,15 @@ class MovieReviewsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.largeTitleDisplayMode = .never
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(close))
 
         aView.tableView.register(MovieReviewCell.self, forCellReuseIdentifier: MovieReviewCell.reuseIdentifier)
 
         viewModel?.setupDataSource(for: aView.tableView)
         viewModel?.updateListWith(movieReviews)
+    }
+
+    @objc func close() {
+        dismiss(animated: true)
     }
 }

@@ -23,7 +23,8 @@ protocol MovieDetailViewModelProtocol {
     var errorHandler: ((ErrorData) -> Void)? { get set }
 
     // Data related
-    var currentMovie: Movie? { get set }
+    var movieData: MovieDetailsViewModelDataTuple? { get set }
+    var reviews: [MovieReview]? { get set }
     func fetchMovie(movieMetadata: MovieMetadata)
     func fetchReviews(movieMetadata: MovieMetadata)
 }
@@ -36,7 +37,8 @@ class DefaultMovieDetailsViewModel: NSObject, MovieDetailViewModelProtocol {
     var reviewsLoaded: (([MovieReview]) -> Void)?
     var errorHandler: ((ErrorData) -> Void)?
 
-    var currentMovie: Movie?
+    var movieData: MovieDetailsViewModelDataTuple?
+    var reviews: [MovieReview]? = []
 
     /// Fetches the details for given movie ID
     /// - Parameter imdbID: String
@@ -54,8 +56,11 @@ class DefaultMovieDetailsViewModel: NSObject, MovieDetailViewModelProtocol {
 
             case .success(let movie):
                 LoggerService.shared.debug("Got response with \(movie) movie")
-                self.currentMovie = movie
-                self.movieLoaded?(self.viewData(for: movie, poster: movieMetadata.cachedPoster))
+                self.movieData = self.viewData(for: movie, poster: movieMetadata.cachedPoster)
+                
+                if let movieData = self.movieData {
+                    self.movieLoaded?(movieData)
+                }
             }
         }
     }
@@ -76,6 +81,7 @@ class DefaultMovieDetailsViewModel: NSObject, MovieDetailViewModelProtocol {
 
             case .success(let movieReviewResponse):
                 LoggerService.shared.debug("Got response with \(movieReviewResponse.results.count) reviews")
+                self.reviews = movieReviewResponse.results
                 self.reviewsLoaded?(movieReviewResponse.results)
             }
         }
