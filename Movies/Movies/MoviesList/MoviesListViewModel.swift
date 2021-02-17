@@ -75,6 +75,7 @@ class DefaultMoviesListViewModel: NSObject, MoviesListViewModelProtocol {
                     if image != movieObject.cachedPoster {
                         if var updatedSnapshot = self?.dataSource?.snapshot() {
                             if let datasourceIndex = updatedSnapshot.indexOfItem(movieObject),
+                               datasourceIndex < self?.currentMovies.count ?? 0,
                                let currentMovie = self?.currentMovies[datasourceIndex] {
                                 currentMovie.cachedPoster = image
                                 updatedSnapshot.reloadItems([currentMovie])

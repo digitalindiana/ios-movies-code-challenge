@@ -15,20 +15,25 @@ typealias MovieDetailsViewModelDataTuple = (header: MovieDetailsHeaderModel,
 protocol MovieDetailViewModelProtocol {
     // API Service
     var apiService: APIServiceProtocol? { get }
+    var additionalApiService: APIServiceProtocol? { get }
 
     // Handlers
     var movieLoaded: ((MovieDetailsViewModelDataTuple) -> Void)? { get set }
+    var reviewsLoaded: (([MovieReview]) -> Void)? { get set }
     var errorHandler: ((ErrorData) -> Void)? { get set }
 
     // Data related
     var currentMovie: Movie? { get set }
     func fetchMovie(movieMetadata: MovieMetadata)
+    func fetchReviews(movieMetadata: MovieMetadata)
 }
 
 class DefaultMovieDetailsViewModel: NSObject, MovieDetailViewModelProtocol {
     var apiService: APIServiceProtocol? = OMDBApiService()
+    var additionalApiService: APIServiceProtocol? = NYTimesApiService()
 
     var movieLoaded: ((MovieDetailsViewModelDataTuple) -> Void)?
+    var reviewsLoaded: (([MovieReview]) -> Void)?
     var errorHandler: ((ErrorData) -> Void)?
 
     var currentMovie: Movie?
@@ -51,6 +56,27 @@ class DefaultMovieDetailsViewModel: NSObject, MovieDetailViewModelProtocol {
                 LoggerService.shared.debug("Got response with \(movie) movie")
                 self.currentMovie = movie
                 self.movieLoaded?(self.viewData(for: movie, poster: movieMetadata.cachedPoster))
+            }
+        }
+    }
+
+    /// Fetches the details for given movie ID
+    /// - Parameter imdbID: String
+    func fetchReviews(movieMetadata: MovieMetadata) {
+        LoggerService.shared.debug("Getting movie \(movieMetadata.imdbID)")
+
+        let endpoint = NYTApiEndpoint.movieReviews(searchedTitle: movieMetadata.title)
+
+        additionalApiService?.performRequest(to: endpoint, responseType: MovieReviewsResponse.self) { result in
+    
+            switch result {
+            case .failure(let apiError):
+                LoggerService.shared.error("Got error while on receving reviews: \(apiError)")
+                self.errorHandler?(NYTimesErrorData(apiError: apiError))
+
+            case .success(let movieReviewResponse):
+                LoggerService.shared.debug("Got response with \(movieReviewResponse.results.count) reviews")
+                self.reviewsLoaded?(movieReviewResponse.results)
             }
         }
     }

@@ -51,6 +51,10 @@ protocol APIServiceProtocol {
                                                                   responseType: Response.Type,
                                                                   responseErrorType: APIError.Type,
                                                                   completion: @escaping ((Result<Response, ApiError>) -> ()))
+
+    func performRequest<Response: Decodable>(to endpoint: Endpoint,
+                                             responseType: Response.Type,
+                                             completion: @escaping ((Result<Response, ApiError>) -> ()))
 }
 
 extension APIServiceProtocol {
@@ -62,10 +66,51 @@ extension APIServiceProtocol {
     }
 
     /// Perform request which tries to decode JSON into Response object
+    /// If it would be impossible - core error would be returned wrapped as ApiError
+    /// - Parameters:
+    ///   - endpoint: Endpoint struct which defines things like path.
+    ///   - responseType: Class used to decode JSON response in case of success
+    ///   - completion: Block returning the result of type Response and ApiError
+    func performRequest<Response: Decodable>(to endpoint: Endpoint,
+                                             responseType: Response.Type,
+                                            completion: @escaping ((Result<Response, ApiError>) -> ())) {
+
+        guard let url = fullUrl(for: endpoint) else {
+            return completion(.failure(ApiError.wrongUrl))
+        }
+
+        URLSession.shared.dataTask(with: url) { data, response, error in
+
+            if let urlError = error as? URLError,
+               urlError.code == URLError.notConnectedToInternet {
+                    completion(.failure(ApiError.noInternet))
+                    return
+            }
+
+            if let error = error {
+                completion(.failure(ApiError.generalError(error: error)))
+                return
+            }
+
+            if let data = data {
+
+                do {
+                    let responseObject = try JSONDecoder().decode(Response.self, from: data)
+                    completion(.success(responseObject))
+                }
+                catch let parseError {
+                    completion(.failure(ApiError.generalError(error: parseError)))
+                }
+            }
+        }.resume()
+    }
+
+    /// Perform request which tries to decode JSON into Response object
     /// In failure case it will try to parse APIError JSON format response
     /// If it would be impossible - core error would be returned wrapped as ApiError
     /// - Parameters:
     ///   - endpoint: Endpoint struct which defines things like path.
+    ///   - responseType: Class used to decode JSON response in case of success
     ///   - responseErrorType: Class used to decode JSON in case of API error
     ///   - completion: Block returning the result of type Response and ApiError
     func performRequest<Response: Decodable, APIError: Decodable>(to endpoint: Endpoint,
