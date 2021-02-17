@@ -15,6 +15,7 @@
 		0E2B408525DD16F0009DEC55 /* MovieReviewsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E2B408425DD16F0009DEC55 /* MovieReviewsViewModel.swift */; };
 		0E2B408925DD1A5E009DEC55 /* NYTimesApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E2B408825DD1A5E009DEC55 /* NYTimesApiService.swift */; };
 		0E2B408F25DD221B009DEC55 /* MovieReviewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E2B408E25DD221B009DEC55 /* MovieReviewCell.swift */; };
+		0E2B409425DD510B009DEC55 /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E2B409325DD510B009DEC55 /* StorageService.swift */; };
 		0E53796A25B3830800D8A39D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0E53796825B3830800D8A39D /* Localizable.strings */; };
 		0E59F73625B0D50100610FDE /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E59F73525B0D50100610FDE /* ErrorView.swift */; };
 		0E59F73B25B0DC8900610FDE /* LoggerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E59F73A25B0DC8900610FDE /* LoggerService.swift */; };
@@ -59,6 +60,7 @@
 		0E2B408425DD16F0009DEC55 /* MovieReviewsViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieReviewsViewModel.swift; sourceTree = "<group>"; };
 		0E2B408825DD1A5E009DEC55 /* NYTimesApiService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NYTimesApiService.swift; sourceTree = "<group>"; };
 		0E2B408E25DD221B009DEC55 /* MovieReviewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieReviewCell.swift; sourceTree = "<group>"; };
+		0E2B409325DD510B009DEC55 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
 		0E53796925B3830800D8A39D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Localizable.strings; sourceTree = "<group>"; };
 		0E53796D25B3830C00D8A39D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = ../en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		0E59F73525B0D50100610FDE /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
@@ -229,6 +231,7 @@
 				0E6F152125AF4846004863B0 /* APIService.swift */,
 				0E6F154325AF8215004863B0 /* OMDBApiService.swift */,
 				0E2B408825DD1A5E009DEC55 /* NYTimesApiService.swift */,
+				0E2B409325DD510B009DEC55 /* StorageService.swift */,
 				0E59F73A25B0DC8900610FDE /* LoggerService.swift */,
 			);
 			path = Services;
@@ -410,6 +413,7 @@
 				0E6F152F25AF6E2D004863B0 /* MoviesListViewModel.swift in Sources */,
 				0E59F7ED25B1BD8B00610FDE /* MovieDetailsViewController.swift in Sources */,
 				0E6F154425AF8215004863B0 /* OMDBApiService.swift in Sources */,
+				0E2B409425DD510B009DEC55 /* StorageService.swift in Sources */,
 				0E59F73B25B0DC8900610FDE /* LoggerService.swift in Sources */,
 				0E59F7EE25B1BD8B00610FDE /* MovieDetailsModel.swift in Sources */,
 				0EE2302F25B1FC7C004F0D27 /* MovieDetailsGeneralInfoView.swift in Sources */,

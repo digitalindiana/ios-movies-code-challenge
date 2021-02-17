@@ -22,6 +22,9 @@ protocol MoviesListViewModelProtocol {
     // API Service
     var apiService: APIServiceProtocol? { get }
 
+    // Storage service
+    var favouritesStorageService: StorageServiceProtocol? { get }
+
     // Basic image cache
     var imageCache: NSCache<NSURL, UIImage> { get }
 
@@ -42,6 +45,7 @@ protocol MoviesListViewModelProtocol {
 class DefaultMoviesListViewModel: NSObject, MoviesListViewModelProtocol {
     var apiService: APIServiceProtocol? = OMDBApiService()
     var dataSource: MoviesDataSource?
+    var favouritesStorageService: StorageServiceProtocol? = FavouriteStorageService()
 
     var moviesLoaded: (([MovieMetadata]) -> Void)?
     var errorHandler: ((ErrorData) -> Void)?
@@ -68,8 +72,18 @@ class DefaultMoviesListViewModel: NSObject, MoviesListViewModelProtocol {
                                                         cellProvider: { [weak self] (collectionView, indexPath, movie) -> UICollectionViewCell? in
 
             if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MovieListCell.reuseIdentifier, for: indexPath) as? MovieListCell {
+                cell.itemIdentifier = movie.imdbID
                 cell.movieTitleLabel.text = movie.title
                 cell.posterImageView.image = movie.cachedPoster
+                cell.isFavourite = self?.favouritesStorageService?.isKeyPresent(movie.imdbID) ?? false
+                cell.favouriteTappedAction = { [weak self] imdbId in
+                    self?.favouritesStorageService?.tooglePresent(for: imdbId)
+                    if let editedMovie = self?.currentMovies.first(where: { $0.imdbID == imdbId }),
+                       var updatedSnapshot = self?.dataSource?.snapshot() {
+                        updatedSnapshot.reloadItems([editedMovie])
+                        self?.dataSource?.apply(updatedSnapshot, animatingDifferences: true)
+                    }
+                }
 
                 self?.downloadPoster(movie: movie) { [weak self] (image, movieObject) in
                     if image != movieObject.cachedPoster {
@@ -90,7 +104,7 @@ class DefaultMoviesListViewModel: NSObject, MoviesListViewModelProtocol {
             return UICollectionViewCell()
         })
     }
-
+    
     func downloadPoster(movie: MovieMetadata, completion: @escaping (UIImage, MovieMetadata) -> ()) {
         guard let posterUrl = NSURL(string: movie.poster), movie.poster != "N/A" else { return }
 

@@ -18,9 +18,20 @@ class MovieListCell: UICollectionViewCell {
         return "MovieListCellIdentifier"
     }
 
+    var itemIdentifier: String = ""
     var posterImageView = UIImageView()
     var movieTitleBackground = UIView()
     var movieTitleLabel = UILabel()
+    private var favouriteButton = UIButton()
+
+    var favouriteTappedAction: ((String) -> Void)?
+
+    var isFavourite: Bool = false {
+        didSet {
+            let imageName = isFavourite ? "icon_favourite" : "icon_non_favourite"
+            favouriteButton.setImage(UIImage(named: imageName), for: .normal)
+        }
+    }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -35,6 +46,7 @@ class MovieListCell: UICollectionViewCell {
         posterImageView.translatesAutoresizingMaskIntoConstraints = false
         movieTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         movieTitleBackground.translatesAutoresizingMaskIntoConstraints = false
+        favouriteButton.translatesAutoresizingMaskIntoConstraints = false
 
         contentView.backgroundColor = UIColor(named: MovieCellColors.cellBackground.rawValue)
         posterImageView.contentMode = .scaleAspectFit
@@ -45,9 +57,14 @@ class MovieListCell: UICollectionViewCell {
         movieTitleLabel.minimumScaleFactor = 0.5
         movieTitleLabel.textColor = .white
 
+        favouriteButton.addTarget(self, action: #selector(MovieListCell.favouriteButtonTap(sender:)), for: .touchUpInside)
+        favouriteButton.imageEdgeInsets = UIEdgeInsets(top: 3, left: 3, bottom: 3, right: 3)
+        favouriteButton.backgroundColor = UIColor.white.withAlphaComponent(0.8)
+
         contentView.addSubview(posterImageView)
         contentView.addSubview(movieTitleBackground)
         contentView.addSubview(movieTitleLabel)
+        contentView.addSubview(favouriteButton)
 
         let movieTitleMargin = CGFloat(2)
 
@@ -62,7 +79,11 @@ class MovieListCell: UICollectionViewCell {
             movieTitleBackground.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             movieTitleBackground.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             movieTitleBackground.topAnchor.constraint(equalTo: movieTitleLabel.topAnchor),
-            movieTitleBackground.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+            movieTitleBackground.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            favouriteButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -5),
+            favouriteButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 5),
+            favouriteButton.widthAnchor.constraint(equalToConstant: 30),
+            favouriteButton.heightAnchor.constraint(equalToConstant: 30)
         ]
         NSLayoutConstraint.activate(constraints)
     }
@@ -71,5 +92,12 @@ class MovieListCell: UICollectionViewCell {
         super.layoutSubviews()
         contentView.clipsToBounds = true
         contentView.layer.cornerRadius = 5
+
+        favouriteButton.clipsToBounds = true
+        favouriteButton.layer.cornerRadius = 5
+    }
+
+    @objc func favouriteButtonTap(sender: AnyObject) {
+        favouriteTappedAction?(itemIdentifier)
     }
 }
