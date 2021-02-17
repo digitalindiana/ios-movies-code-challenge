@@ -14,6 +14,7 @@ class MoviesListView: UIView {
     var filtersLabel = UILabel()
     var filtersButton = UIButton(type: .system)
     var errorView: ErrorView = ErrorView()
+    var activitySpinner = UIActivityIndicatorView(style: .large)
 
     var shouldShowFavouritesOnly: Bool = false {
         didSet {
@@ -38,8 +39,10 @@ class MoviesListView: UIView {
         filtersLabel.translatesAutoresizingMaskIntoConstraints = false
         filtersButton.translatesAutoresizingMaskIntoConstraints = false
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.backgroundColor = .clear
+        activitySpinner.translatesAutoresizingMaskIntoConstraints = false
         errorView.translatesAutoresizingMaskIntoConstraints = false
+
+        collectionView.backgroundColor = .clear
 
         filtersLabel.text = NSLocalizedString("Showing:", comment: "")
         filtersLabel.textAlignment = .right
@@ -56,6 +59,9 @@ class MoviesListView: UIView {
         addSubview(collectionView)
         addSubview(errorView)
         addSubview(filtersStackView)
+        collectionView.addSubview(activitySpinner)
+
+        activitySpinner.isHidden = true
 
         let constraints = [
             filtersStackView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
@@ -69,8 +75,18 @@ class MoviesListView: UIView {
             errorView.leadingAnchor.constraint(equalTo: leadingAnchor),
             errorView.trailingAnchor.constraint(equalTo: trailingAnchor),
             errorView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            errorView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
+            errorView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+            activitySpinner.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor),
+            activitySpinner.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
+    }
+
+    func showActivityView() {
+        activitySpinner.startAnimating()
+    }
+
+    func hideActivityView() {
+        activitySpinner.stopAnimating()
     }
 }

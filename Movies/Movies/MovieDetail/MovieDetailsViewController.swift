@@ -43,6 +43,8 @@ class MovieDetailsViewController: UIViewController {
             aView.contentStackView.isHidden = false
             aView.headerView.posterImageView.image = movieMetadata.cachedPoster
 
+            aView.showActivityView()
+
             requestsGroup.enter()
             viewModel?.fetchMovie(movieMetadata: movieMetadata)
 
@@ -58,6 +60,7 @@ class MovieDetailsViewController: UIViewController {
         viewModel?.errorHandler = { errorData in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
+                self.aView.hideActivityView()
                 self.aView.errorView.isHidden = false
                 self.reviewsButton?.isEnabled = false
                 self.aView.contentStackView.isHidden = true
@@ -77,6 +80,7 @@ class MovieDetailsViewController: UIViewController {
         requestsGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
             LoggerService.shared.debug("Got all data")
+            self.aView.hideActivityView()
             self.reviewsButton?.isEnabled = true
             self.fulfillViewWithMovieData()
         }

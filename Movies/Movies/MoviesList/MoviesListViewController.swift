@@ -75,6 +75,7 @@ class MoviesListViewController: UIViewController {
         viewModel?.errorHandler = { errorData in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
+                self.aView.hideActivityView()
                 self.aView.errorView.isHidden = false
                 self.aView.collectionView.isHidden = true
                 self.aView.errorView.show(errorData)
@@ -84,6 +85,7 @@ class MoviesListViewController: UIViewController {
         viewModel?.moviesLoaded = { [weak self] _ in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
+                self.aView.hideActivityView()
                 self.aView.errorView.isHidden = true
                 self.aView.collectionView.isHidden = false
             }
@@ -105,6 +107,7 @@ extension MoviesListViewController: UISearchResultsUpdating {
             return
         }
 
+        aView.showActivityView()
         viewModel?.fetchMovies(searchedTitle: searchedText, forced: true)
     }
 }

@@ -17,6 +17,8 @@ class MovieDetailsView: UIView {
     var generalInfoView = MovieDetailsGeneralInfoView()
     var castInfoView = MovieDetailsCastInfoView()
 
+    var activitySpinner = UIActivityIndicatorView(style: .large)
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.setupUI()
@@ -35,8 +37,10 @@ class MovieDetailsView: UIView {
         headerView.translatesAutoresizingMaskIntoConstraints = false
         generalInfoView.translatesAutoresizingMaskIntoConstraints = false
         castInfoView.translatesAutoresizingMaskIntoConstraints = false
+        activitySpinner.translatesAutoresizingMaskIntoConstraints = false
 
         scrollView.addSubview(contentStackView)
+        scrollView.addSubview(activitySpinner)
         addSubview(scrollView)
         addSubview(errorView)
 
@@ -47,6 +51,8 @@ class MovieDetailsView: UIView {
         
         contentStackView.axis = .vertical
         contentStackView.backgroundColor = .clear
+
+        activitySpinner.isHidden = true
       
         let constraints = [
             scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -62,8 +68,18 @@ class MovieDetailsView: UIView {
             errorView.trailingAnchor.constraint(equalTo: trailingAnchor),
             errorView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             errorView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
-            headerView.heightAnchor.constraint(equalTo: safeAreaLayoutGuide.heightAnchor, multiplier: 0.33)
+            headerView.heightAnchor.constraint(equalTo: safeAreaLayoutGuide.heightAnchor, multiplier: 0.33),
+            activitySpinner.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor),
+            activitySpinner.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
+    }
+
+    func showActivityView() {
+        activitySpinner.startAnimating()
+    }
+
+    func hideActivityView() {
+        activitySpinner.stopAnimating()
     }
 }
