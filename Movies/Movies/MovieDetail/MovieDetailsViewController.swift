@@ -57,32 +57,51 @@ class MovieDetailsViewController: UIViewController {
 
     func configureHandlers() {
         aView.errorView.isHidden = true
+
         viewModel?.errorHandler = { errorData in
+            self.requestsGroup.leave()
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                self.aView.hideActivityView()
                 self.aView.errorView.isHidden = false
-                self.reviewsButton?.isEnabled = false
                 self.aView.contentStackView.isHidden = true
                 self.aView.errorView.show(errorData)
             }
         }
+
+        viewModel?.reviewsErrorHandler = { errorData in
+            self.requestsGroup.leave()
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.reviewsButton?.isEnabled = false
+
+                let alertVC = UIAlertController(title: NSLocalizedString("Reviews error..", comment: ""),
+                                                message: errorData.errorDescription,
+                                                preferredStyle: .alert)
+                alertVC.addAction(.init(title: NSLocalizedString("Okay..", comment: ""), style: .default, handler: nil))
+                self.present(alertVC, animated: true)
+            }
+        }
+
         viewModel?.movieLoaded = { [weak self] _ in
             guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.fulfillViewWithMovieData()
+            }
             self.requestsGroup.leave()
         }
 
         viewModel?.reviewsLoaded = { [weak self] _ in
             guard let self = self else { return }
             self.requestsGroup.leave()
+            DispatchQueue.main.async {
+                self.reviewsButton?.isEnabled = true
+            }
         }
 
         requestsGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
             LoggerService.shared.debug("Got all data")
             self.aView.hideActivityView()
-            self.reviewsButton?.isEnabled = true
-            self.fulfillViewWithMovieData()
         }
     }
 

@@ -19,8 +19,10 @@ protocol MovieDetailViewModelProtocol {
 
     // Handlers
     var movieLoaded: ((MovieDetailsViewModelDataTuple) -> Void)? { get set }
-    var reviewsLoaded: (([MovieReview]) -> Void)? { get set }
     var errorHandler: ((ErrorData) -> Void)? { get set }
+
+    var reviewsLoaded: (([MovieReview]) -> Void)? { get set }
+    var reviewsErrorHandler: ((ErrorData) -> Void)? { get set }
 
     // Data related
     var movieData: MovieDetailsViewModelDataTuple? { get set }
@@ -36,6 +38,7 @@ class DefaultMovieDetailsViewModel: NSObject, MovieDetailViewModelProtocol {
     var movieLoaded: ((MovieDetailsViewModelDataTuple) -> Void)?
     var reviewsLoaded: (([MovieReview]) -> Void)?
     var errorHandler: ((ErrorData) -> Void)?
+    var reviewsErrorHandler: ((ErrorData) -> Void)?
 
     var movieData: MovieDetailsViewModelDataTuple?
     var reviews: [MovieReview]? = []
@@ -77,7 +80,7 @@ class DefaultMovieDetailsViewModel: NSObject, MovieDetailViewModelProtocol {
             switch result {
             case .failure(let apiError):
                 LoggerService.shared.error("Got error while on receving reviews: \(apiError)")
-                self.errorHandler?(NYTimesErrorData(apiError: apiError))
+                self.reviewsErrorHandler?(NYTimesErrorData(apiError: .response(errorFromApi: "Cannot find reviews")))
 
             case .success(let movieReviewResponse):
                 LoggerService.shared.debug("Got response with \(movieReviewResponse.results.count) reviews")
