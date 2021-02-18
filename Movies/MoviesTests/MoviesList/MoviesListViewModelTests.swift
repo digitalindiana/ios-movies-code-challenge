@@ -2,12 +2,10 @@
 //  MoviesListViewModelTests.swift
 //  MoviesTests
 //
-//  Created by Piotr Adamczak on 16/02/2021.
+//  Created by Piotr Adamczak on 18/02/2021.
 //
 
 @testable import Movies
-import Combine
-import SwiftyMocky
 import XCTest
 
 public enum TestError: Error {
@@ -24,23 +22,18 @@ extension TestError: LocalizedError {
 }
 
 class MoviesListViewModelTests: XCTestCase {
-    var apiServiceMock = APIServiceProtocolMock()
+    var apiServiceMock = ApiServiceMock()
     var collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout())
-    let apiResponseSubject = PassthroughSubject<MoviesListResponse, ApiError>()
     var viewModel = DefaultMoviesListViewModel()
 
     override func setUpWithError() throws {
         try super.setUpWithError()
+        apiServiceMock.mockedError = nil
+        apiServiceMock.mockedResponse = nil
+        apiServiceMock.pagination = nil
         viewModel.apiService = apiServiceMock
         collectionView.register(MovieListCell.self, forCellWithReuseIdentifier: MovieListCell.reuseIdentifier)
         viewModel.setupDataSource(for: collectionView)
-
-        Matcher.default.register(OMDBApiResponseError.Type.self) { (lhs, rhs) -> Bool in
-            return lhs == rhs
-        }
-
-        let mockedPublisher: AnyPublisher<MoviesListResponse, ApiError>? = apiResponseSubject.eraseToAnyPublisher()
-        Given(apiServiceMock, .performRequest(to: .any, responseErrorType: .value(OMDBApiResponseError.self), willReturn: mockedPublisher))
     }
 
     func testPaginationForTerm_WithSameQuery() {
@@ -49,7 +42,7 @@ class MoviesListViewModelTests: XCTestCase {
         XCTAssertEqual(pagination.queryItem, "marvel")
         XCTAssertEqual(pagination.currentPage, 1)
 
-        Given(apiServiceMock, .pagination(getter: .some(pagination)))
+        apiServiceMock.pagination = pagination
 
         let nextPagination = viewModel.paginationForTerm("marvel")
         XCTAssertNotNil(nextPagination)
@@ -63,7 +56,7 @@ class MoviesListViewModelTests: XCTestCase {
         XCTAssertEqual(pagination.queryItem, "marvel")
         XCTAssertEqual(pagination.currentPage, 1)
 
-        Given(apiServiceMock, .pagination(getter: .some(pagination)))
+        apiServiceMock.pagination = pagination
 
         let nextPagination = viewModel.paginationForTerm("matrix")
         XCTAssertNotNil(nextPagination)
@@ -72,10 +65,11 @@ class MoviesListViewModelTests: XCTestCase {
     }
 
     func testFetchMovies_whenMoreDataAvailable() {
-        let moviesLoadedExpecation = expectation(description: "Movies loaded")
-        let fakeMovies = (1 ... 5).map { MovieMetadata(title: "title_\($0)", year: "2021", imdbID: "123", type: .movie, poster: "") }
+        let fakeMovies = (1 ... 5).map { MovieMetadata(imdbID: "123", title: "title_\($0)", year: "2021", type: .movie, poster: "") }
         let movieListResponseMock = MoviesListResponse(movies: fakeMovies, totalResults: "15", response: "True")
+        apiServiceMock.mockedResponse = movieListResponseMock
 
+        let moviesLoadedExpecation = expectation(description: "Movies loaded")
         viewModel.moviesLoaded = { movies in
             moviesLoadedExpecation.fulfill()
             XCTAssertEqual(movies.count, 5)
@@ -88,15 +82,16 @@ class MoviesListViewModelTests: XCTestCase {
         }
 
         viewModel.fetchMovies(searchedTitle: "test", forced: true)
-        apiResponseSubject.send(movieListResponseMock)
+
         waitForExpectations(timeout: 2)
     }
 
     func testFetchMovies_forCorrectData() {
-        let moviesLoadedExpecation = expectation(description: "Movies loaded")
-        let fakeMovies = (1 ... 5).map { MovieMetadata(title: "title_\($0)", year: "2021", imdbID: "123", type: .movie, poster: "") }
+        let fakeMovies = (1 ... 5).map { MovieMetadata(imdbID: "123", title: "title_\($0)", year: "2021", type: .movie, poster: "") }
         let movieListResponseMock = MoviesListResponse(movies: fakeMovies, totalResults: "5", response: "True")
+        apiServiceMock.mockedResponse = movieListResponseMock
 
+        let moviesLoadedExpecation = expectation(description: "Movies loaded")
         viewModel.moviesLoaded = { movies in
             moviesLoadedExpecation.fulfill()
             XCTAssertEqual(movies.count, 5)
@@ -109,24 +104,25 @@ class MoviesListViewModelTests: XCTestCase {
         }
 
         viewModel.fetchMovies(searchedTitle: "test", forced: true)
-        apiResponseSubject.send(movieListResponseMock)
+
         waitForExpectations(timeout: 2)
     }
 
     func testFetchMovies_forNoInternetError() {
-        let errorReturnedExpecation = expectation(description: "Error called")
+        apiServiceMock.mockedError = .noInternet
 
+        let errorReturnedExpecation = expectation(description: "Error called")
         viewModel.errorHandler = { error in
             errorReturnedExpecation.fulfill()
             XCTAssertEqual(error.errorDescription, NSLocalizedString("Check Internet connection and try again", comment: "No Internet Connection"))
         }
 
         viewModel.fetchMovies(searchedTitle: "test", forced: true)
-        apiResponseSubject.send(completion: Subscribers.Completion<ApiError>.failure(.noInternet))
         waitForExpectations(timeout: 2)
     }
 
     func testFetchMovies_forAPIError() {
+        apiServiceMock.mockedError = .response(errorFromApi: "API_ERROR")
         let errorReturnedExpecation = expectation(description: "Error called")
 
         viewModel.errorHandler = { error in
@@ -135,11 +131,11 @@ class MoviesListViewModelTests: XCTestCase {
         }
 
         viewModel.fetchMovies(searchedTitle: "test", forced: true)
-        apiResponseSubject.send(completion: Subscribers.Completion<ApiError>.failure(.response(errorFromApi: "API_ERROR")))
         waitForExpectations(timeout: 2)
     }
 
     func testFetchMovies_forGeneralError() {
+        apiServiceMock.mockedError = .generalError(error: TestError.testError)
         let errorReturnedExpecation = expectation(description: "Error called")
 
         viewModel.errorHandler = { error in
@@ -148,13 +144,12 @@ class MoviesListViewModelTests: XCTestCase {
         }
 
         viewModel.fetchMovies(searchedTitle: "test", forced: true)
-        apiResponseSubject.send(completion: Subscribers.Completion<ApiError>.failure(.generalError(error: TestError.testError)))
         waitForExpectations(timeout: 2)
     }
 
     func testClearData_AndGenerateError() {
         // Given
-        viewModel.currentMovies = [MovieMetadata(title: "title_", year: "2021", imdbID: "123", type: .movie, poster: "")]
+        viewModel.currentMovies = [MovieMetadata(imdbID: "123", title: "title", year: "2021", type: .movie, poster: "")]
         XCTAssertEqual(viewModel.currentMovies.count, 1)
 
         let emptyDataErrorReturnedExpectation = expectation(description: "Empty data error returned")
@@ -175,7 +170,7 @@ class MoviesListViewModelTests: XCTestCase {
 
     func testClearData_AndNotGenerateError() {
         // Given
-        viewModel.currentMovies = [MovieMetadata(title: "title_", year: "2021", imdbID: "123", type: .movie, poster: "")]
+        viewModel.currentMovies = [MovieMetadata(imdbID: "123", title: "title", year: "2021", type: .movie, poster: "")]
         XCTAssertEqual(viewModel.currentMovies.count, 1)
 
         let emptyDataErrorNotReturnedExpectation = expectation(description: "Empty data not error returned")
@@ -201,7 +196,7 @@ class MoviesListViewModelTests: XCTestCase {
     }
 
     func testUpdateListWith_For5Movies() {
-        let fakeMovies = (1 ... 5).map { MovieMetadata(title: "title_\($0)", year: "2021", imdbID: "123", type: .movie, poster: "") }
+        let fakeMovies = (1 ... 5).map { MovieMetadata(imdbID: "123", title: "title_\($0)", year: "2021", type: .movie, poster: "")  }
         viewModel.updateListWith(fakeMovies)
         XCTAssertEqual(viewModel.dataSource?.snapshot().numberOfSections, 1)
         XCTAssertEqual(viewModel.dataSource?.snapshot().numberOfItems, 5)

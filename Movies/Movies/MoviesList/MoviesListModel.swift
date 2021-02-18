@@ -29,7 +29,7 @@ class MovieMetadata: Codable {
     let title: String
     let year: String
     let imdbID: String
-    let type: MediaType = .movie
+    let type: MediaType
     let poster: String
     var cachedPoster: UIImage? = nil
 
@@ -39,6 +39,14 @@ class MovieMetadata: Codable {
         case imdbID
         case type = "Type"
         case poster = "Poster"
+    }
+
+    init(imdbID: String, title: String = "", year: String = "", type: MediaType = .movie, poster: String = "") {
+        self.imdbID = imdbID
+        self.title = title
+        self.year = year
+        self.poster = poster
+        self.type = type
     }
 }
 

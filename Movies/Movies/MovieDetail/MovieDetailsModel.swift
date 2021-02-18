@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Movie
 
-class Movie: Codable {
+struct Movie: Codable {
     let title, year, rated, released: String
     let runtime, genre, director, writer: String
     let actors, plot, language, country: String
