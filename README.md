@@ -1,9 +1,21 @@
-# movies-app-challenge-ios
+# ios-movies-code-challenge
 
-That's the sample app for displaying list of movies and it's details
+That's the sample app for displaying list of movies and it's details.
+Each detail screen might have additional option for NYTimes movie reviews.
+
+User can add movies to favourites. 
+There is possibility to display all movies or only favourites. 
+
+## How to run project
+
+1. Go to Movies folder
+1. Open Movies.xcodeproj in Xcode
+1. Run the app
 
 ## Author
 Piotr Adamczak
+
+
 
 ## Screenshots
 

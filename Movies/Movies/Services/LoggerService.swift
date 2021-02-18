@@ -13,10 +13,14 @@ struct LoggerService {
     static var shared = LoggerService()
 
     func debug(_ log: String) {
+        #if DEBUG
         os_log("[Debug] %@", log: .default, type: .debug, log)
+        #endif
     }
 
     func error(_ log: String) {
+        #if DEBUG
         os_log("[Error] %@", log: .default, type: .error, log)
+        #endif
     }
 }

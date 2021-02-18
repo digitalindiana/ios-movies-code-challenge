@@ -99,7 +99,6 @@ class MovieDetailsCastInfoView: UIView {
 
     func apply(textStyle: UIFont.TextStyle, for label: UILabel) {
         label.font = UIFont.preferredFont(forTextStyle: textStyle)
-        label.textColor = .black
         label.numberOfLines = 0
     }
 
